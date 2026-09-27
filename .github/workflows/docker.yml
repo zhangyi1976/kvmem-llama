@@ -1,7 +1,11 @@
 name: Build Docker image (CUDA 12.9)
 
-# Builds the selected ref (default: tag v0.16.0-rc3) and pushes
+# Builds the selected ref (default: master) and pushes
 # ghcr.io/<owner>/<repo>:v0.16.0-rc3 — CUDA 12.9 with sm_70 (V100/Volta).
+#
+# master carries VERSION 0.16.0-rc3 and the cumulative KVMem patch, so it is
+# the only ref that builds from a fresh checkout (the tag tree ships an
+# incremental patch that needs an existing KVMem baseline).
 #
 # Manual trigger: the upstream tag trees do not contain this workflow, so a tag
 # push would not run it. The workflow file is read from the default branch.
@@ -11,7 +15,7 @@ on:
       ref:
         description: "Git ref to build (tag or branch)"
         required: false
-        default: "v0.16.0-rc3"
+        default: "master"
       cuda_arch:
         description: "CMAKE_CUDA_ARCHITECTURES (70-real = V100)"
         required: false

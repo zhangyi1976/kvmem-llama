@@ -106,8 +106,9 @@ Build and publish (one-time):
 
 1. Push this repository — including the `v0.16.0-rc3` tag — to your own GitHub account.
 2. Open **Actions → "Build Docker image (CUDA 12.9)" → Run workflow**. Inputs default to
-   `ref = v0.16.0-rc3` and `cuda_arch = 70-real`; change `cuda_arch` to cover other GPUs
-   (e.g. `86-real` for RTX 30, or `70-real,86-real` for both).
+   `ref = master` (the v0.16.0-rc3 line — the tag tree ships only an incremental patch, so a
+   fresh build must use master) and `cuda_arch = 70-real`; change `cuda_arch` to cover other
+   GPUs (e.g. `86-real` for RTX 30, or `70-real,86-real` for both).
 3. When the run finishes, the image is available as
    `ghcr.io/<your-user>/<your-repo>:v0.16.0-rc3` (also tagged `latest`).
 
