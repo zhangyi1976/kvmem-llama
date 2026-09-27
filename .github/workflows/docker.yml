@@ -1,5 +1,8 @@
 name: Build Docker image (CUDA 12.9)
 
+# Builds the selected ref (default: tag v0.16.0-rc3) and pushes
+# ghcr.io/<owner>/<repo>:v0.16.0-rc3 — CUDA 12.9 with sm_70 (V100/Volta).
+#
 # Manual trigger: the upstream tag trees do not contain this workflow, so a tag
 # push would not run it. The workflow file is read from the default branch.
 on:
