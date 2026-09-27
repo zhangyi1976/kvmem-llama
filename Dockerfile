@@ -7,6 +7,7 @@
 #   CUDA_ARCH            CMAKE_CUDA_ARCHITECTURES (default 70-real = V100)
 
 ARG CUDA_IMAGE=nvidia/cuda:12.9.2-devel-ubuntu24.04
+ARG CUDA_RUNTIME_IMAGE=nvidia/cuda:12.9.2-runtime-ubuntu24.04
 FROM ${CUDA_IMAGE} AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -45,7 +46,6 @@ RUN cmake -S . -B build \
     && cmake --build build --parallel "$(nproc)"
 
 # ---- runtime ----
-ARG CUDA_RUNTIME_IMAGE=nvidia/cuda:12.9.2-runtime-ubuntu24.04
 FROM ${CUDA_RUNTIME_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
