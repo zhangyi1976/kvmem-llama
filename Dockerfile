@@ -22,11 +22,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 
 WORKDIR /src
 COPY . .
-# Use the llama.cpp checkout from the build context; fetch the pinned commit
-# when the context was created without submodules.
-RUN if [ ! -f llama.cpp/CMakeLists.txt ]; then \
-        git submodule update --init --depth 1 llama.cpp; \
-    fi
+# The build context must contain the pinned llama.cpp submodule sources.
+RUN test -f llama.cpp/CMakeLists.txt || { echo "llama.cpp submodule missing from build context" >&2; exit 1; }
 
 RUN bash scripts/apply-patches.sh
 RUN python3 scripts/build-webui.py
