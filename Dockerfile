@@ -34,7 +34,10 @@ RUN cmake -S . -B build \
         -DCMAKE_CUDA_ARCHITECTURES="${CUDA_ARCH}" \
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/src/build/bin \
         -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/src/build/bin \
-        -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath-link,/usr/local/cuda/lib64/stubs" \
+        # --allow-shlib-undefined: libggml-cuda.so needs the CUDA driver API
+        # (libcuda.so.1) which only exists on a real GPU host; resolve at
+        # runtime. Same fix as llama.cpp/.devops/cuda.Dockerfile.
+        -DCMAKE_EXE_LINKER_FLAGS="-Wl,--allow-shlib-undefined -Wl,-rpath-link,/usr/local/cuda/lib64/stubs" \
         -DGGML_CUDA=ON \
         -DGGML_CUDA_FA_ALL_QUANTS=ON \
         -DGGML_NATIVE=OFF \
