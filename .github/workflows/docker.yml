@@ -33,6 +33,15 @@ jobs:
           submodules: true
           fetch-depth: 0
 
+      # Upstream tag trees do not contain the Docker build files; pull them
+      # from the default branch when the requested ref lacks them.
+      - name: Ensure Docker build files are present
+        run: |
+          if [ ! -f Dockerfile ]; then
+            git fetch --depth=1 origin master
+            git checkout FETCH_HEAD -- Dockerfile .dockerignore
+          fi
+
       - name: Resolve latest CUDA 12.9 images
         id: cuda
         run: |
