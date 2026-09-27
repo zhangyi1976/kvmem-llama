@@ -1,0 +1,6 @@
+.git/modules
+build
+build-ui
+models
+*.log
+submodule-jobid.txt

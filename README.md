@@ -94,6 +94,46 @@ The locally converted IQ4 MTP-Q4_0 main model does not yet have a project-provid
 download link in this release; use your prepared file or the optional quantizer.
 The recipes and conversion commands below document the historical tested setup.
 
+## Docker image (CUDA 12.9, V100 / Volta sm_70)
+
+The repository includes a `Dockerfile` and a GitHub Actions workflow that build the
+v0.16.0-rc3 line on CUDA 12.9 with the `sm_70` target (CUDA 13 dropped Volta, so the
+CUDA 12.9 build is the V100-capable one) and push the image to GitHub Container
+Registry. The image contains `llama-kvmem-server`, `llama-kvmem-cli`, the browser UI
+and the CUDA 12.9 runtime libraries.
+
+Build and publish (one-time):
+
+1. Push this repository — including the `v0.16.0-rc3` tag — to your own GitHub account.
+2. Open **Actions → "Build Docker image (CUDA 12.9)" → Run workflow**. Inputs default to
+   `ref = v0.16.0-rc3` and `cuda_arch = 70-real`; change `cuda_arch` to cover other GPUs
+   (e.g. `86-real` for RTX 30, or `70-real,86-real` for both).
+3. When the run finishes, the image is available as
+   `ghcr.io/<your-user>/<your-repo>:v0.16.0-rc3` (also tagged `latest`).
+
+Pull and run on a machine with the NVIDIA driver and
+[nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html):
+
+```sh
+docker login ghcr.io
+docker pull ghcr.io/<your-user>/<your-repo>:v0.16.0-rc3
+docker run -d --name kvmem --gpus all -p 18200:18200 \
+    -v /path/to/models:/models \
+    ghcr.io/<your-user>/<your-repo>:v0.16.0-rc3 \
+    -m /models/Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf \
+    --mmproj /models/mmproj-Qwen3.8-27B-Q5_K-MIX.gguf --no-mmproj-offload \
+    -c 262144 --kvmem-budget 36864 --kvmem-gen-reserve 16384 \
+    --kv-dtype q8_0 --spec-type draft-mtp
+```
+
+Then open `http://<host>:18200/` for the browser UI, or call the OpenAI-compatible
+API at `/v1/chat/completions`.
+
+中文：把本仓库（含 `v0.16.0-rc3` 标签）推送到自己的 GitHub 后，在 Actions 页面手动运行
+"Build Docker image (CUDA 12.9)"，云端会编译 CUDA 12.9（含 V100 的 sm_70）版本并推送到
+GHCR；之后在任意装有 NVIDIA 驱动和 nvidia-container-toolkit 的机器上
+`docker pull ghcr.io/<你的用户名>/<仓库名>:v0.16.0-rc3` 即可使用。
+
 ## Clone, patch, build
 
 Building uses a C++17 compiler, CMake and **CUDA Toolkit 13.2 Update 2 (nvcc 13.2.86) or newer**. The Linux startup scripts use Python 3.10+ and `ss` (iproute2).
