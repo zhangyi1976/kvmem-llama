@@ -1,4 +1,5 @@
 .git
+llama.cpp/.git
 build
 build-ui
 models
