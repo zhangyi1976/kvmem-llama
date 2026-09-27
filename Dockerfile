@@ -25,6 +25,10 @@ COPY . .
 # The build context must contain the pinned llama.cpp submodule sources.
 RUN test -f llama.cpp/CMakeLists.txt || { echo "llama.cpp submodule missing from build context" >&2; exit 1; }
 
+# TEMP DEBUG
+RUN ls -la /src/patches/ && find /src/llama.cpp -type f | wc -l && git --version && \
+    (git -C /src/llama.cpp apply --check /src/patches/llama-kvmem-current.patch || echo DEBUG_APPLY_CHECK_FAILED)
+
 RUN bash scripts/apply-patches.sh
 RUN python3 scripts/build-webui.py
 
