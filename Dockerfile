@@ -50,7 +50,9 @@ RUN cmake -S . -B build \
 FROM ${CUDA_RUNTIME_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+# libgomp1: ggml's OpenMP code links libgomp, which the devel image provides
+# but the slim runtime image does not.
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Keep the build/ layout: the server auto-serves ../share/kvmem/ui relative to
@@ -59,6 +61,13 @@ COPY --from=builder /src/build/bin /opt/kvmem/bin
 COPY --from=builder /src/build/share /opt/kvmem/share
 
 ENV LD_LIBRARY_PATH=/opt/kvmem/bin:/usr/local/cuda/lib64
+
+# Fail the build if the runtime image lacks a library the server needs.
+# libcuda.so.1 is expected to be absent here; the NVIDIA driver provides it
+# on the GPU host.
+RUN unexpected=$(ldd /opt/kvmem/bin/llama-kvmem-server | grep "not found" | grep -v "libcuda.so.1" || true) \
+    && if [ -n "$unexpected" ]; then echo "runtime image is missing libraries:"; echo "$unexpected"; exit 1; fi
+
 EXPOSE 18200
 WORKDIR /models
 ENTRYPOINT ["/opt/kvmem/bin/llama-kvmem-server"]
